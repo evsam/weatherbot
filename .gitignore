@@ -1,3 +1,5 @@
 .venv
 .idea
-data_base
+.gitignore
+.env
+db.sqlite
