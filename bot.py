@@ -1,5 +1,4 @@
-from email.policy import default
-
+from utils import is_time, to_timezone_for_bot
 import telebot
 from telebot import types
 from weather import get_city_ind
@@ -8,6 +7,10 @@ from setup_tables import main_setup
 import sqlite3
 from dotenv import load_dotenv
 import os
+from datetime import datetime
+import schedule
+import time
+import traceback
 
 BOT_TIMEZONE = 5
 
@@ -16,55 +19,44 @@ main_setup()
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
 bot = telebot.TeleBot(TOKEN)
+
 print('Bot started')
 
+def check_users_time():
+    now = datetime.now()
+    # current_time = now.strftime('%H:%M')
+    current_time = '12:00'
+    conn = sqlite3.connect('db.sqlite')
+    cur = conn.cursor()
+    cur.execute('SELECT user_chat_id, city_id FROM users WHERE bot_message_time = "%s"' % current_time)
+    user_records = cur.fetchall()
+    cities = []
+    for user_city in user_records:
+        user_chat_id = user_city[0]
+        city_id = user_city[1]
+        print("city_id", city_id)
+        # found = list(filter(lambda cities_item: cities_item["city_id"] == city_id, cities))
+        found = [cities_item for cities_item in cities if cities_item["city_id"] == city_id]
+        print(found)
+        if len(found) > 0:
+            existing_city_users = found[0]
+            existing_city_users["users"].append(user_chat_id)
+
+        else:
+            city_users = {'city_id': city_id, 'users': [user_chat_id]}
+            cities.append(city_users)
+            print(cities)
+
+
+# schedule.every(1).minutes.at(':00').do(check_users_time)
 
 # @bot.message_handler(commands=['stop'])
 # def stop(message):
 #     bot.send_message(message.chat.id, 'Бот остановлен. Чтобы возобновить его работу, нажмите /continue')
 
 
-def is_time(time):
-    if time.count(':') > 1 or time.count(':') == 0:
-        return False
-    else:
-        split_time = time.split(':')
-        hours = parse_int(split_time[0])
-        minutes = parse_int(split_time[1])
-        if hours is None or minutes is None:
-            return False
-        if hours > 23 or hours < 0 or minutes > 59 or minutes < 0:
-            return False
-        return True
 
 
-def parse_int(value):
-    if value is None:
-        return None
-    try:
-        return int(value)
-    except ValueError:
-        return None
-
-
-def to_timezone_for_bot(message_time, bot_time_zone, user_time_zone):
-    user_time_zone = int(user_time_zone.replace(user_time_zone[3:], '').replace(user_time_zone[0], ''))
-
-    definitions_timezones = user_time_zone - bot_time_zone
-
-    hour = message_time.split(':')[0]
-
-    message_time = f'{int(hour) - definitions_timezones}' + ':' + message_time.split(':')[1]
-
-    bot_hour = int(message_time.split(':')[0])
-
-    if bot_hour < 0:
-        bot_hour = 24 - abs(bot_hour)
-        message_time = message_time.replace(message_time.split(':')[0], f'{bot_hour}')
-    elif bot_hour > 23:
-        bot_hour = bot_hour - 24
-        message_time = message_time.replace(message_time.split(':')[0], f'{bot_hour}')
-    return message_time
 
 def reset_user_data(message):
     conn = sqlite3.connect('db.sqlite')
@@ -158,7 +150,13 @@ def enter_time(message, time_zone):
 
 
 def default_message(message):
+    try:
+        check_users_time()
+    except Exception:
+        traceback.print_exc()
+
     bot.send_message(message.chat.id, 'Для остановки отправки прогнозов введите /stop')
+
 
 
 def register_user(message, city_index, time_zone):
@@ -202,5 +200,15 @@ def view(call):
 def view(call):
     bot.send_message(call.message.chat.id, "stop")
 
+def send_weather_message(city_id, user_chat_id_list):
+    weather = get_weather(city_id)
+    for user_chat_id in user_chat_id_list:
+        bot.send_message(user_chat_id, f'<b>{weather[1]}</b>', parse_mode='html')
 
-bot.polling(non_stop=True)
+bot.infinity_polling()
+
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
+
+

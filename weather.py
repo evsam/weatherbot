@@ -29,7 +29,7 @@ def get_weather_text(forecast_data, city_name):
 
 def parse_weather_response(data):
     city = data.get('city')
-    time_zone = city.get('timeZone', '+0200')
+    time_zone = city.get('timeZone', '+0300')
     weather_text = get_weather_text(city['forecast']['forecastDay'], city.get('cityName'))
     return [time_zone, weather_text]
 
