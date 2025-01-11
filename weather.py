@@ -2,7 +2,6 @@ from datetime import datetime
 import sqlite3
 import requests
 
-
 def get_weather_text(forecast_data, city_name):
     weather_text = f"Погода на три дня в г. {city_name}.\n\n"
     if len(forecast_data) == 0:
@@ -11,7 +10,7 @@ def get_weather_text(forecast_data, city_name):
     for day_weather in forecast_data:
         forecast_date = day_weather.get('forecastDate')
         date = datetime.strptime(forecast_date, '%Y-%m-%d')
-        date_text = date.strftime('%d %B')
+        date_text = date.strftime('%d %b')
         min_temp = day_weather.get('minTemp')
         max_temp = day_weather.get('maxTemp')
         weather_description = day_weather.get('weather')
@@ -44,15 +43,17 @@ def get_weather(city_id):
     except ValueError:
         return None
 
-def get_city_ind(city):
-    conn = sqlite3.connect('db.sqlite')
+def select_city_id(conn, city):
     cur = conn.cursor()
     cur.execute("SELECT city_id FROM cities WHERE city = '%s'" % city)
     city_index = cur.fetchone()
     cur.close()
-    conn.close()
+    return city_index
 
+def get_city_ind(conn, city):
+    city_index = select_city_id(conn, city)
     if city_index is not None:
         return city_index[0]
     else:
         return None
+
