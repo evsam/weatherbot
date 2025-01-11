@@ -1,11 +1,5 @@
 import codecs
-import sqlite3
 
-def create_table(conn):
-    cur = conn.cursor()
-    cur.execute('CREATE TABLE IF NOT EXISTS cities (id INTEGER PRIMARY KEY AUTOINCREMENT, country varchar(50) NOT NULL, city varchar(50) NOT NULL, city_id varchar(25) NOT NULL)')
-    conn.commit()
-    cur.close()
 
 def insert_info_cities(conn, country, city, city_id):
     cur = conn.cursor()
@@ -13,8 +7,8 @@ def insert_info_cities(conn, country, city, city_id):
     conn.commit()
     cur.close()
 
+
 def import_cities(conn):
-    create_table(conn)
     cur = conn.cursor()
     cur.execute("SELECT COUNT(*) FROM cities")
     city_count = cur.fetchone()[0]
@@ -27,5 +21,5 @@ def import_cities(conn):
             country = line_parts[0].replace('"', '')
             city = str.lower(line_parts[1].replace('"', ''))
             city_id = line_parts[2].replace('"', '').replace('\n', '')
-            insert_info_cities(connect, country, city, city_id)
+            insert_info_cities(conn, country, city, city_id)
             print(line.replace('\n', ''))

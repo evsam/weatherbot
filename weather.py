@@ -1,6 +1,7 @@
 from datetime import datetime
-import sqlite3
 import requests
+from constants import WEATHER_SERVICE_URL
+
 
 def get_weather_text(forecast_data, city_name):
     weather_text = f"Погода на три дня в г. {city_name}.\n\n"
@@ -16,15 +17,16 @@ def get_weather_text(forecast_data, city_name):
         weather_description = day_weather.get('weather')
         date_line = f"{date_text}: от {min_temp} до {max_temp} ℃, {weather_description}"
         if weather_description.count('снег') > 0:
-             date_line += '❄️\n'
+            date_line += '❄️\n'
         elif weather_description.count('ясно') > 0:
-             date_line += '☀️\n'
+            date_line += '☀️\n'
         elif weather_description.count('дождь') > 0:
-             date_line += '🌧\n'
+            date_line += '🌧\n'
         else:
             date_line += '\n'
         weather_text += date_line
     return weather_text
+
 
 def parse_weather_response(data):
     city = data.get('city')
@@ -32,8 +34,9 @@ def parse_weather_response(data):
     weather_text = get_weather_text(city['forecast']['forecastDay'], city.get('cityName'))
     return [time_zone, weather_text]
 
+
 def get_weather(city_id):
-    url = f'https://worldweather.wmo.int/ru/json/{city_id}_ru.xml'
+    url = WEATHER_SERVICE_URL.replace('{city_id}', city_id)
     response = requests.get(url)
     if not response.ok:
         return None
@@ -43,12 +46,14 @@ def get_weather(city_id):
     except ValueError:
         return None
 
+
 def select_city_id(conn, city):
     cur = conn.cursor()
     cur.execute("SELECT city_id FROM cities WHERE city = '%s'" % city)
     city_index = cur.fetchone()
     cur.close()
     return city_index
+
 
 def get_city_ind(conn, city):
     city_index = select_city_id(conn, city)
