@@ -11,6 +11,7 @@ def is_time(time):
             return False
         return True
 
+
 def parse_int(value):
     if value is None:
         return None
@@ -19,6 +20,8 @@ def parse_int(value):
     except ValueError:
         return None
 
+
+# TODO: Переписать эту функцию
 def to_timezone_for_bot(message_time, bot_time_zone, user_time_zone):
     user_time_zone = int(user_time_zone.replace(user_time_zone[3:], '').replace(user_time_zone[0], ''))
 
