@@ -1,6 +1,11 @@
 from datetime import datetime, timedelta
 import requests
-from constants import WEATHER_SERVICE_URL
+import dotenv
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+WEATHER_SERVICE_URL = os.getenv('WEATHER_SERVICE_URL')
 
 def get_day_part(date):
     if 6 <= date.hour <= 11:
