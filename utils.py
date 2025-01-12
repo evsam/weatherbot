@@ -23,7 +23,7 @@ def parse_int(value):
 
 # TODO: Переписать эту функцию
 def to_timezone_for_bot(message_time, bot_time_zone, user_time_zone):
-    user_time_zone = int(user_time_zone.replace(user_time_zone[3:], '').replace(user_time_zone[0], ''))
+    user_time_zone = int(user_time_zone)//3600
 
     definitions_timezones = user_time_zone - bot_time_zone
 

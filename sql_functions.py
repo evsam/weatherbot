@@ -21,9 +21,8 @@ def select_user_message_time(connect, message):
 
 def select_user_view_information(connect, message):
     cur = connect.cursor()
-    cur.execute('SELECT cities.city, users.user_message_time\
-             FROM users INNER JOIN cities\
-             ON users.city_id = cities.city_id AND user_chat_id = "%s"' % message.chat.id)
+    cur.execute('SELECT city_name, user_message_time\
+             FROM users WHERE user_chat_id = "%s"' % message.chat.id)
     info = cur.fetchone()
     cur.close()
     return info
@@ -66,10 +65,10 @@ def select_user_data(connect, message):
     return user_data
 
 
-def register_user(connect, message, city_index, time_zone):
+def register_user(connect, message, city_name, time_zone):
     user_chat_id = message.chat.id
     cur = connect.cursor()
-    cur.execute("INSERT INTO users (user_chat_id, city_id, time_zone) VALUES ('%s', '%s', '%s')" % (user_chat_id, city_index, time_zone))
+    cur.execute("INSERT INTO users (user_chat_id, city_name, time_zone) VALUES ('%s', '%s', '%s')" % (user_chat_id, city_name, time_zone))
     connect.commit()
     cur.close()
 
@@ -88,7 +87,7 @@ def select_users_info_with_same_time(connect):
     current_time = now.strftime('%H:%M')
     cur = connect.cursor()
     cur.execute(
-        'SELECT user_chat_id, city_id FROM users WHERE bot_message_time = "%s" and is_running = 1' % current_time)
+        'SELECT user_chat_id, city_name FROM users WHERE bot_message_time = "%s" and is_running = 1' % current_time)
     user_records = cur.fetchall()
     cur.close()
     return user_records
