@@ -24,7 +24,7 @@ pip install -r requirements.txt
 - Создаем новый конфиг файл в папке /etc/systemd/system
 ```
 cd /etc/systemd/system
-touch weatherbot.service
+sudo nano weatherbot.service
 ```
 
 - Записываем конфигурацию сервиса в файл weatherbot.service
@@ -68,4 +68,10 @@ sudo systemctl enable weatherbot.service
 
 ```
 sudo systemctl status weatherbot.service
+```
+
+- Перезапустить сервис
+
+```
+sudo systemctl start weatherbot.service
 ```
