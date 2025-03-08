@@ -8,12 +8,20 @@ import sqlite3
 import time
 import threading
 from sql_functions import *
-from constants import TOKEN, SQLITE_FILE
+from constants import BOT_TOKEN, SQLITE_FILE
+import logging
 
 main_setup()
-bot = telebot.TeleBot(TOKEN)
-print('Bot started')
+bot = telebot.TeleBot(BOT_TOKEN)
 
+logging.basicConfig(filename='/var/www/python/weatherbot/debug.log',
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    level=logging.DEBUG)
+
+
+logging.info('Bot started')
 
 @bot.message_handler(commands=['reset'])
 def reset(message):
@@ -178,8 +186,15 @@ def default_message(message):
 
 def send_weather_message(city_name, user_chat_id_list):
     weather = get_weather(city_name)
+    if weather is None or weather[1] is None:
+        logging.error(f'error getting data for city: ${city_name}')
+        return
     for user_chat_id in user_chat_id_list:
-        bot.send_message(user_chat_id, f'{weather[1]}', parse_mode='html')
+        logging.debug(f'send_message to:, {user_chat_id} of city: {city_name}')
+        try:
+            bot.send_message(user_chat_id, f'{weather[1]}', parse_mode='html')
+        except Exception as e:
+            logging.debug('message error: ', e)
 
 
 def run_scheduler(interval=1):
