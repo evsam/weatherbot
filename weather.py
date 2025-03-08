@@ -26,7 +26,7 @@ def get_weather_text(forecast_list, city_name):
         if date.hour == 9 or date.hour == 15 or date.hour == 21 or date.hour == 3:
             city_date = date + offset
             day_time_text = get_day_part(city_date)
-            date_text = city_date.strftime('%d %b')
+            date_text = city_date.strftime('%d %b %A')
             if date_text != date_text_prev:
                 date_text_prev = date_text
                 days_count+=1
