@@ -14,7 +14,7 @@ import logging
 main_setup()
 bot = telebot.TeleBot(BOT_TOKEN)
 
-logging.basicConfig(filename='/var/www/python/weatherbot/debug.log',
+logging.basicConfig(filename='./debug.log',
                     filemode='a',
                     format='%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -193,8 +193,8 @@ def send_weather_message(city_name, user_chat_id_list):
         logging.debug(f'send_message to:, {user_chat_id} of city: {city_name}')
         try:
             bot.send_message(user_chat_id, f'{weather[1]}', parse_mode='html')
-        except Exception as e:
-            logging.debug('message error: ', e)
+        except Exception as exception:
+            logging.debug(f'message error: {exception}', exc_info=True)
 
 
 def run_scheduler(interval=1):
